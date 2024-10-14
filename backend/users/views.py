@@ -1,5 +1,5 @@
-from rest_framework.generics import GenericAPIView
-from rest_framework.permissions import AllowAny
+from rest_framework.generics import GenericAPIView, RetrieveAPIView
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.views import TokenRefreshView
@@ -9,6 +9,8 @@ from .serializer import UserRegisterSerializer
 from rest_framework.response import Response
 from .utils import generate_tokens_and_set_cookie
 from django.contrib.auth import get_user_model
+from .models import UserModel
+from .serializer import UserSerializer
 
 User = get_user_model()
 
@@ -47,3 +49,27 @@ class UserRegistrationView(GenericAPIView):
             user = serializer.save()
             return generate_tokens_and_set_cookie(user)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class DetailUser(RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserSerializer
+
+    def get(self, request, *args, **kwargs):
+        user = self.request.user
+        serializer = self.get_serializer(user)
+        return Response(serializer.data)
+
+class LogoutView(GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+
+        if not request.COOKIES.get('refresh_token'):
+            return Response({"detail": "No tokens provided."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+        response = Response({"detail": "Successfully logged out."}, status=status.HTTP_200_OK)
+        response.delete_cookie('refresh_token')
+        return response
