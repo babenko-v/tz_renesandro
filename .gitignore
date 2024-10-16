@@ -4,7 +4,7 @@ __pycache__/
 
 .idea/
 
-.env
+backend/.env
 
 db.sqlite3
 media/

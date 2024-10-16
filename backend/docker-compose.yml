@@ -1,0 +1,29 @@
+
+services:
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: renesandro
+      POSTGRES_USER: home
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  web:
+    build: .
+    command: gunicorn backend.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgres://home:root@db:5432/renesandro
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+
+
+volumes:
+  postgres_data:
