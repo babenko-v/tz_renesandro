@@ -22,7 +22,6 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
         user = authenticate(request, username=username, password=password)
         if user is not None:
-            # Вызываем функцию для генерации токенов и установки cookie
             return generate_tokens_and_set_cookie(user)
         else:
             return JsonResponse({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
