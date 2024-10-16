@@ -6,6 +6,11 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
         fields = ['id', 'title', 'audio_file', 'user']
 
+class TaskSerializerWithoutAudio(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+        fields = ['id', 'title', 'prompts']
+
 class TaskSerializerGet(serializers.ModelSerializer):
     class Meta:
         model = Task

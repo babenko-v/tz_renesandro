@@ -1,10 +1,10 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.permissions import  AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Task
-from .serializer import TaskSerializer, TaskSerializerGet, TaskIDSerializer, BatchUpdateTaskSerializer
+from .serializer import TaskSerializer, TaskSerializerGet, TaskIDSerializer, BatchUpdateTaskSerializer, TaskSerializerWithoutAudio
 from users.models import UserModel
 from .utils import transcribes_audio_into_text
 
@@ -78,6 +78,19 @@ class TaskBatchPutView(APIView):
                 'not_found_ids': list(not_found_ids)
             }, status=status.HTTP_200_OK)
 
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class TaskPostWithoutAudio(APIView):
+    serializer_class = TaskSerializerWithoutAudio
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        data = request.data.copy()
+
+        serializer = TaskSerializerWithoutAudio(data=data)
+        if serializer.is_valid():
+            task = serializer.save()
+            return Response(TaskSerializer(task).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
